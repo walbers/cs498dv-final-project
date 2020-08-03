@@ -21,6 +21,7 @@
   </center>
 </p>
 <div id="my_dataviz2"></div>
+<div id="my_dataviz3"></div>
 
 <style>
   .content {
@@ -145,5 +146,61 @@ d3.csv("https://walbers.github.io/cs498dv-final-project/sea_level.csv",
 })
 })();
 </script>
+
+<script>
+(function() {
+var margin = {top: 10, right: 30, bottom: 30, left: 60},
+    width = 600 - margin.left - margin.right,
+    height = 400 - margin.top - margin.bottom;
+
+var svg = d3.select("#my_dataviz3")
+  .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform",
+          "translate(" + margin.left + "," + margin.top + ")");
+
+  svg.append("text")
+        .attr("x", (width / 2))
+        .attr("y", margin.top)
+        .attr("text-anchor", "middle")
+        .style("font-size", "16px")
+        .style("text-decoration", "underline")
+        .text("Sea Level vs Time");
+
+d3.csv("https://walbers.github.io/cs498dv-final-project/data.csv",
+  function(d){
+    return { date : d3.timeParse("%Y")(d.Date), value : d.Value }
+  },
+
+  function(data) {
+    var x = d3.scaleTime()
+      .domain(d3.extent(data, function(d) {
+        return d.date; }))
+      .range([ 0, width ]);
+    svg.append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x));
+
+    var y = d3.scaleLinear()
+      .domain([9, d3.max(data, function(d) { return +d.value; })])
+      .range([ height, 9]);
+    svg.append("g")
+      .call(d3.axisLeft(y));
+
+    svg.append("path")
+      .datum(data)
+      .attr("fill", "none")
+      .attr("stroke", "steelblue")
+      .attr("stroke-width", 1.5)
+      .attr("d", d3.line()
+        .x(function(d) { return x(d.date) })
+        .y(function(d) { return y(d.value) })
+        )
+})
+})();
+</script>
+
 </div>
 </body>
