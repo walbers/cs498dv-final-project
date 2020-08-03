@@ -1,82 +1,158 @@
-<html>
-<script src='https://d3js.org/d3.v5.min.js'></script>
-<style> circle {fill: lightblue; stroke: black;} </style>
-<body onload='init()'>
-<svg width=300 height=300>
-</svg>
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<!-- Load d3.js -->
+<script src="https://d3js.org/d3.v4.js"></script>
+<script src="https://rawgit.com/susielu/d3-annotation/master/d3-annotation.min.js"></script>
+
+
+<!-- Create a div where the graph will take place -->
+<header>
+    Narrative Visualization project
+</header>
+<body>
+<a href="https://google.com" class="button">Next slide</a>
+<div id="my_dataviz"></div>
+<div id="my_dataviz2"></div>
+
 <script>
-async function init() {
-  const data = await d3.csv("https://walbers.github.io/cs498dv-final-project/GlobalTemperatures.csv");
-  var margin = 50;
-  var height = 200;
-  var width = 200;
+(function() {
+  var margin = {top: 10, right: 30, bottom: 30, left: 60},
+    width = 600 - margin.left - margin.right,
+    height = 400 - margin.top - margin.bottom;
 
-  d3.select("svg")
-    .append("g")
-    .attr("transform", "translate("+margin+","+margin+")")
-    .selectAll("cicrcle")
-    .data(data)
-    .enter().append("path")
-    .attr("fill", "none")
-    .attr("stroke", "steelblue")
-    .attr("stroke-width", 1.5)
-    .attr("d", d3.line()
-      .x(function(d) { return d.dt; })
-      .y(function(d) { return d.LandAverageTemperature; })
-      )
+var svg = d3.select("#my_dataviz")
+  .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform",
+          "translate(" + margin.left + "," + margin.top + ")");
 
+  svg.append("text")
+        .attr("x", (width / 2))
+        .attr("y", margin.top)
+        .attr("text-anchor", "middle")
+        .style("font-size", "16px")
+        .style("text-decoration", "underline")
+        .text("Mean Temperature vs Time");
 
-  //   .attr("cx", function(d) {return x(d.AverageCityMPG);})
-  //   .attr("cy", function(d) {return y(d.AverageHighwayMPG);})
-  //   .attr("r", function(d) {return +d.EngineCylinders+2;});
-
-  // svg.append("path")
-  //     .datum(data)
-  //     .attr("fill", "none")
-  //     .attr("stroke", "steelblue")
-  //     .attr("stroke-width", 1.5)
-  //     .attr("d", d3.line()
-  //       .x(function(d) { return x(d.date) })
-  //       .y(function(d) { return y(d.value) })
-  //       )
+// d3.csv("https://raw.githubusercontent.com/holtzy/data_to_viz/master/Example_dataset/3_TwoNumOrdered_comma.csv",
+d3.csv("https://walbers.github.io/cs498dv-final-project/temps.csv",
+  function(d){
+    return { date : d3.timeParse("%Y")(d.Year), value : d.Mean }
+  },
 
 
-// const data = await d3.csv("https://flunky.github.io/cars2017.csv");
-// var margin = 50;
-// var height = 200;
-// var width = 200;
-//
-// var x = d3.scaleLog()
-//   .domain([10,150])
-//   .range([0,width]);
-// var y = d3.scaleLog()
-//   .domain([10,150])
-//   .range([height,0]);
-//
-//
-// d3.select("svg")
-//   .append("g")
-//   .attr("transform", "translate("+margin+","+margin+")")
-//   .selectAll("cicrcle")
-//   .data(data)
-//   .enter().append("circle")
-//   .attr("cx", function(d) {return x(d.AverageCityMPG);})
-//   .attr("cy", function(d) {return y(d.AverageHighwayMPG);})
-//   .attr("r", function(d) {return +d.EngineCylinders+2;});
-//
-// d3.select("svg").append("g")
-//   .attr("transform", "translate("+margin+","+margin+")")
-//   .call(d3.axisLeft(y)
-//   .tickValues([10,20,50,100])
-//   .tickFormat(d3.format("~s")));
-//
-// d3.select("svg").append("g")
-//   .attr("transform", "translate("+margin+","+(height+margin)+")")
-//   .call(d3.axisBottom(x)
-//   .tickValues([10,20,50,100])
-//   .tickFormat(d3.format("~s")));
+  function(data) {
+    var annotations = [
+      {
+        note: {
+          label: "",
+          title: "El Nino",
+          align: "right",
 
-}
+        },
+        color: ["red"],
+        x: 565,
+        y: 65,
+        dy: 120,
+        dx: 10
+      }
+    ]
+    const makeAnnotations = d3.annotation()
+  .annotations(annotations);
+
+  // console.log(makeAnnotations);
+
+    var x = d3.scaleTime()
+      .domain(d3.extent(data, function(d) {
+        return d.date; }))
+      .range([ 0, width ]);
+    svg.append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x));
+
+    var y = d3.scaleLinear()
+      .domain([-.6, d3.max(data, function(d) { return +d.value; })])
+      .range([ height, -.6]);
+    svg.append("g")
+      .call(d3.axisLeft(y));
+
+    svg.append("path")
+      .datum(data)
+      .attr("fill", "none")
+      .attr("stroke", "steelblue")
+      .attr("stroke-width", 1.5)
+      .attr("d", d3.line()
+        .x(function(d) { return x(d.date) })
+        .y(function(d) { return y(d.value) })
+      );
+
+      d3.select("svg")
+      .append("g")
+      .attr("class", "annotation-group")
+      .call(makeAnnotations)
+      .style("font-size", "16px");
+
+})
+})();
+</script>
+<!-- <h2> Stuff... </h2> -->
+
+<script>
+(function() {
+var margin = {top: 10, right: 30, bottom: 30, left: 60},
+    width = 600 - margin.left - margin.right,
+    height = 400 - margin.top - margin.bottom;
+
+var svg = d3.select("#my_dataviz2")
+  .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform",
+          "translate(" + margin.left + "," + margin.top + ")");
+
+  svg.append("text")
+        .attr("x", (width / 2))
+        .attr("y", margin.top)
+        .attr("text-anchor", "middle")
+        .style("font-size", "16px")
+        .style("text-decoration", "underline")
+        .text("Sea Level vs Time");
+
+// d3.csv("https://raw.githubusercontent.com/holtzy/data_to_viz/master/Example_dataset/3_TwoNumOrdered_comma.csv",
+d3.csv("https://walbers.github.io/cs498dv-final-project/sea_level.csv",
+  function(d){
+    return { date : d3.timeParse("%m/%d/%Y")(d.Time), value : d.GMSL }
+  },
+
+  function(data) {
+    var x = d3.scaleTime()
+      .domain(d3.extent(data, function(d) {
+        return d.date; }))
+      .range([ 0, width ]);
+    svg.append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x));
+
+    var y = d3.scaleLinear()
+      .domain([-.6, d3.max(data, function(d) { return +d.value; })])
+      .range([ height, -.6]);
+    svg.append("g")
+      .call(d3.axisLeft(y));
+
+    svg.append("path")
+      .datum(data)
+      .attr("fill", "none")
+      .attr("stroke", "steelblue")
+      .attr("stroke-width", 1.5)
+      .attr("d", d3.line()
+        .x(function(d) { return x(d.date) })
+        .y(function(d) { return y(d.value) })
+        )
+})
+})();
 </script>
 </body>
-</html>
