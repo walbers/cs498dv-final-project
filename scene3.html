@@ -98,7 +98,7 @@ var margin = {top: 10, right: 30, bottom: 30, left: 60},
     width = 600 - margin.left - margin.right,
     height = 400 - margin.top - margin.bottom;
 
-var svg = d3.select("#my_dataviz2")
+var svg = d3.select("#my_dataviz3")
   .append("svg")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
@@ -113,6 +113,12 @@ var svg = d3.select("#my_dataviz2")
         .style("font-size", "16px")
         .style("text-decoration", "underline")
         .text("Sea Level vs Time");
+  svg.append("text")
+        .attr("x", 440)
+        .attr("y", 10)
+        .style("font-size", "12px")
+        .style("text-decoration", "underline")
+        .text("El Nino -->");
 
 d3.csv("https://walbers.github.io/cs498dv-final-project/sea_level.csv",
   function(d){
@@ -153,7 +159,7 @@ var margin = {top: 10, right: 30, bottom: 30, left: 60},
     width = 600 - margin.left - margin.right,
     height = 400 - margin.top - margin.bottom;
 
-var svg = d3.select("#my_dataviz3")
+var svg = d3.select("#my_dataviz2")
   .append("svg")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
@@ -167,7 +173,14 @@ var svg = d3.select("#my_dataviz3")
         .attr("text-anchor", "middle")
         .style("font-size", "16px")
         .style("text-decoration", "underline")
-        .text("Sea Level vs Time");
+        .text("Amount of Sea Ice vs Time");
+
+        svg.append("text")
+              .attr("x", 420)
+              .attr("y", 143)
+              .style("font-size", "12px")
+              .style("text-decoration", "underline")
+              .text("El Nino -->");
 
 d3.csv("https://walbers.github.io/cs498dv-final-project/data.csv",
   function(d){
